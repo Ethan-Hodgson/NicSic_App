@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "564179084894",
+    "project_id": "nicsick",
+    "storage_bucket": "nicsick.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:564179084894:android:fccb282388c7010e2f36cf",
+        "android_client_info": {
+          "package_name": "com.example.nicsick_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDj1XOIePJd1zPQNC21QlrSdj5kNM6coJo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
