@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'firebase_options.dart'; // This is generated
-import './screens/auth_screen.dart'; // or wherever your login screen is
+import 'firebase_options.dart';
+import 'screens/login_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -17,11 +17,10 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'NicSick App',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-      ),
-      home: const AuthScreen(),
+      title: 'NicSick',
+      debugShowCheckedModeBanner: false,
+      theme: ThemeData(primarySwatch: Colors.blue),
+      home: const LoginScreen(),
     );
   }
 }

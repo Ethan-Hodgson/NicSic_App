@@ -14,6 +14,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "564179084894-1b698siavqn1c3g9u6q1mv8u9lli086e.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.nicsick_app",
+            "certificate_hash": "bbdddb05f052c1e9776c5803a8a77d22bcb4d2e5"
+          }
+        },
+        {
           "client_id": "564179084894-65hkrkqc4qh80cq0m8nloravjoc5dhs6.apps.googleusercontent.com",
           "client_type": 3
         }
@@ -29,6 +37,13 @@
             {
               "client_id": "564179084894-65hkrkqc4qh80cq0m8nloravjoc5dhs6.apps.googleusercontent.com",
               "client_type": 3
+            },
+            {
+              "client_id": "564179084894-6d0gf7q3chcgtl3s9asv8dea6fdfadgp.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.nicsickApp"
+              }
             }
           ]
         }
