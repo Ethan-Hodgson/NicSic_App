@@ -14,7 +14,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
   final passwordController = TextEditingController();
   final AuthService _authService = AuthService();
 
-  void _signUp() async {
+  Future<void> _signUp() async {
     final email = emailController.text.trim();
     final password = passwordController.text.trim();
 
@@ -24,9 +24,12 @@ class _SignUpScreenState extends State<SignUpScreen> {
         context,
         MaterialPageRoute(builder: (_) => const HomeScreen()),
       );
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Account successfully created!")),
+      );
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Sign-Up Failed: $e")),
+        SnackBar(content: Text("Sign-up failed: $e")),
       );
     }
   }
@@ -35,7 +38,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text("Sign Up")),
-      body: Padding(
+      body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
