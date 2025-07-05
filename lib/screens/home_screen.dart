@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:nicsick_app/screens/symptom_tracker_screen.dart';
 import '../services/firestore_service.dart';
 import '../models/user_model.dart';
 import 'login_screen.dart';
@@ -18,10 +19,16 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
+    _loadUserData();
+  }
+
+  void _loadUserData() {
     final user = FirebaseAuth.instance.currentUser;
-    _userFuture = user != null
-        ? FirestoreService().getUser(user.uid)
-        : Future.value(null);
+    setState(() {
+      _userFuture = user != null
+          ? FirestoreService().getUser(user.uid)
+          : Future.value(null);
+    });
   }
 
   void _logout() async {
@@ -34,12 +41,44 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-  void _onNavBarTapped(int index) {
+  void _onNavBarTapped(int index) async {
     setState(() {
       _selectedIndex = index;
     });
 
-    // TODO: Implement navigation logic based on selected index
+    if (index == 0) {
+      // Track Symptoms (go to symptom tracker, then refresh after)
+      await Navigator.push(
+        context,
+        MaterialPageRoute(builder: (_) => const SymptomTrackerScreen()),
+      );
+      _loadUserData();
+    }
+    // TODO: Implement navigation for History, Quests, Profile if needed
+  }
+
+  /// Helper to format "Last Tracked"
+  String formatLastTracked(DateTime? lastTracked) {
+    if (lastTracked == null) return "Never";
+    final now = DateTime.now();
+    final difference = now.difference(lastTracked);
+
+    if (difference.inDays == 0) {
+      return "Today";
+    } else if (difference.inDays == 1) {
+      return "1 day ago";
+    } else if (difference.inDays < 7) {
+      return "${difference.inDays} days ago";
+    } else if (difference.inDays < 30) {
+      final weeks = (difference.inDays / 7).floor();
+      return "$weeks week${weeks > 1 ? 's' : ''} ago";
+    } else if (difference.inDays < 365) {
+      final months = (difference.inDays / 30).floor();
+      return "$months month${months > 1 ? 's' : ''} ago";
+    } else {
+      final years = (difference.inDays / 365).floor();
+      return "$years year${years > 1 ? 's' : ''} ago";
+    }
   }
 
   @override
@@ -51,7 +90,7 @@ class _HomeScreenState extends State<HomeScreen> {
           IconButton(
             icon: const Icon(Icons.logout),
             onPressed: _logout,
-          )
+          ),
         ],
       ),
       body: FutureBuilder<AppUser?>(
@@ -74,28 +113,24 @@ class _HomeScreenState extends State<HomeScreen> {
               children: [
                 Text(
                   "Welcome back, ${user.name}",
-                  style: const TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 16),
 
-                // Track Symptoms Button
                 ElevatedButton(
-                  onPressed: () {
-                    // TODO: Navigate to track screen
+                  onPressed: () async {
+                    await Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => const SymptomTrackerScreen()),
+                    );
+                    _loadUserData();
                   },
                   style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 20),
-                  ),
-                  child: const Text("Track Symptoms",
-                      style: TextStyle(fontSize: 18)),
+                      padding: const EdgeInsets.symmetric(vertical: 20)),
+                  child: const Text("Track Symptoms", style: TextStyle(fontSize: 18)),
                 ),
-
                 const SizedBox(height: 24),
 
-                // Last Tracked + Chart Box
                 Row(
                   children: [
                     Expanded(
@@ -108,16 +143,10 @@ class _HomeScreenState extends State<HomeScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text("Last Tracked",
-                                style: TextStyle(fontWeight: FontWeight.bold)),
+                            const Text("Last Tracked", style: TextStyle(fontWeight: FontWeight.bold)),
                             const SizedBox(height: 8),
                             Text(
-                              user.lastTracked != null
-                                  ? user.lastTracked!
-                                      .toLocal()
-                                      .toString()
-                                      .split(' ')[0]
-                                  : "Never",
+                              formatLastTracked(user.lastTracked),
                               style: const TextStyle(fontSize: 16),
                             ),
                           ],
@@ -136,10 +165,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                   ],
                 ),
-
                 const SizedBox(height: 24),
-
-                // Streak Card
                 Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
@@ -161,19 +187,15 @@ class _HomeScreenState extends State<HomeScreen> {
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text("Current Streak",
-                              style: TextStyle(fontWeight: FontWeight.bold)),
+                          const Text("Current Streak", style: TextStyle(fontWeight: FontWeight.bold)),
                           Text("${user.currentStreak} days"),
                           const Text("Keep it up!"),
                         ],
-                      )
+                      ),
                     ],
                   ),
                 ),
-
                 const SizedBox(height: 24),
-
-                // Tokens Card
                 Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
@@ -195,12 +217,11 @@ class _HomeScreenState extends State<HomeScreen> {
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text("Tokens",
-                              style: TextStyle(fontWeight: FontWeight.bold)),
+                          const Text("Tokens", style: TextStyle(fontWeight: FontWeight.bold)),
                           Text("${user.tokens}"),
-                          const Text("Earn by completing quests"),
+                          const Text("Earn by completing challenges"),
                         ],
-                      )
+                      ),
                     ],
                   ),
                 ),
@@ -210,14 +231,16 @@ class _HomeScreenState extends State<HomeScreen> {
         },
       ),
       bottomNavigationBar: BottomNavigationBar(
+        backgroundColor: Colors.grey[200],
+        unselectedItemColor: Colors.blue,
+        selectedItemColor: Colors.blue,
         currentIndex: _selectedIndex,
-        onTap: _onNavBarTapped,
         type: BottomNavigationBarType.fixed,
+        onTap: _onNavBarTapped,
         items: const [
-          BottomNavigationBarItem(
-              icon: Icon(Icons.track_changes), label: 'Track'),
+          BottomNavigationBarItem(icon: Icon(Icons.track_changes), label: 'Track'),
           BottomNavigationBarItem(icon: Icon(Icons.history), label: 'History'),
-          BottomNavigationBarItem(icon: Icon(Icons.flag), label: 'Quests'),
+          BottomNavigationBarItem(icon: Icon(Icons.flag), label: 'Challenges'),
           BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
         ],
       ),
