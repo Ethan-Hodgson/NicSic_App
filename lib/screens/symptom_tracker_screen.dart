@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import '../services/firestore_service.dart'; // Make sure this import is correct for handleStreakRewards!
 import 'home_screen.dart';
 
 class SymptomTrackerScreen extends StatefulWidget {
@@ -33,7 +34,8 @@ class _SymptomTrackerScreenState extends State<SymptomTrackerScreen> {
     }
     // Default date to today
     final now = DateTime.now();
-    _dateController.text = "${now.year.toString().padLeft(4, '0')}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}";
+    _dateController.text =
+        "${now.year.toString().padLeft(4, '0')}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}";
   }
 
   @override
@@ -52,7 +54,8 @@ class _SymptomTrackerScreenState extends State<SymptomTrackerScreen> {
     );
     if (picked != null) {
       setState(() {
-        _dateController.text = "${picked.year.toString().padLeft(4, '0')}-${picked.month.toString().padLeft(2, '0')}-${picked.day.toString().padLeft(2, '0')}";
+        _dateController.text =
+            "${picked.year.toString().padLeft(4, '0')}-${picked.month.toString().padLeft(2, '0')}-${picked.day.toString().padLeft(2, '0')}";
       });
     }
   }
@@ -108,9 +111,7 @@ class _SymptomTrackerScreenState extends State<SymptomTrackerScreen> {
 
     try {
       // Save symptom log
-      await userDocRef
-          .collection('symptomLogs')
-          .add({
+      await userDocRef.collection('symptomLogs').add({
         'date': _dateController.text,
         'symptoms': selected,
         'other': _otherController.text.trim(),
@@ -122,6 +123,9 @@ class _SymptomTrackerScreenState extends State<SymptomTrackerScreen> {
         'lastTracked': Timestamp.fromDate(today),
         'currentStreak': newStreak,
       });
+
+      // Reward logic for streaks/badges/tokens
+      await FirestoreService().handleStreakRewards(user, newStreak);
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(

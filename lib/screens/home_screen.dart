@@ -4,6 +4,11 @@ import 'package:nicsick_app/screens/symptom_tracker_screen.dart';
 import '../services/firestore_service.dart';
 import '../models/user_model.dart';
 import 'login_screen.dart';
+import 'challenges_screen.dart';
+
+// Placeholder imports for screens to be implemented later
+// import 'game_screen.dart';
+// import 'health_info_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -47,17 +52,21 @@ class _HomeScreenState extends State<HomeScreen> {
     });
 
     if (index == 0) {
-      // Track Symptoms (go to symptom tracker, then refresh after)
       await Navigator.push(
         context,
         MaterialPageRoute(builder: (_) => const SymptomTrackerScreen()),
       );
       _loadUserData();
+    }else if (index == 2) {
+      await Navigator.push(
+        context,
+        MaterialPageRoute(builder: (_) => const ChallengesScreen()),
+      );
+      _loadUserData();
     }
-    // TODO: Implement navigation for History, Quests, Profile if needed
+    // TODO: Implement navigation for History, Challenges, Profile if needed
   }
 
-  /// Helper to format "Last Tracked"
   String formatLastTracked(DateTime? lastTracked) {
     if (lastTracked == null) return "Never";
     final now = DateTime.now();
@@ -81,11 +90,25 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
+  void _navigateToGameScreen() {
+    // TODO: Navigate to the GameScreen once implemented
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text("Game screen coming soon!")),
+    );
+  }
+
+  void _navigateToHealthInfoScreen() {
+    // TODO: Navigate to the HealthInfoScreen once implemented
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text("Health info coming soon!")),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("NicSick"),
+        title: const Text("NicSic"),
         actions: [
           IconButton(
             icon: const Icon(Icons.logout),
@@ -166,6 +189,8 @@ class _HomeScreenState extends State<HomeScreen> {
                   ],
                 ),
                 const SizedBox(height: 24),
+
+                // Current Streak
                 Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
@@ -196,6 +221,43 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                 ),
                 const SizedBox(height: 24),
+
+                // Health Card/Button
+                GestureDetector(
+                  onTap: _navigateToHealthInfoScreen,
+                  child: Container(
+                    padding: const EdgeInsets.all(18),
+                    decoration: BoxDecoration(
+                      color: Colors.red[50],
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: Colors.red.shade100),
+                    ),
+                    child: Row(
+                      children: [
+                        Container(
+                          height: 50,
+                          width: 50,
+                          decoration: BoxDecoration(
+                            color: Colors.red[200],
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: const Icon(Icons.health_and_safety, size: 30),
+                        ),
+                        const SizedBox(width: 18),
+                        const Expanded(
+                          child: Text(
+                            "Health",
+                            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                          ),
+                        ),
+                        const Icon(Icons.arrow_forward_ios, size: 18)
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 24),
+
+                // Tokens Widget with Use Token Button
                 Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
@@ -211,16 +273,30 @@ class _HomeScreenState extends State<HomeScreen> {
                           color: Colors.purple[200],
                           borderRadius: BorderRadius.circular(8),
                         ),
-                        child: const Icon(Icons.monetization_on, size: 32),
+                        child: const Icon(Icons.auto_awesome, size: 32),
                       ),
                       const SizedBox(width: 16),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text("Tokens", style: TextStyle(fontWeight: FontWeight.bold)),
-                          Text("${user.tokens}"),
-                          const Text("Earn by completing challenges"),
-                        ],
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text("Tokens", style: TextStyle(fontWeight: FontWeight.bold)),
+                            Text("${user.tokens}"),
+                            const Text("Earn by completing challenges"),
+                          ],
+                        ),
+                      ),
+                      ElevatedButton(
+                        onPressed: _navigateToGameScreen,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.deepPurple,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                        child: const Text("Use Token"),
                       ),
                     ],
                   ),
