@@ -5,6 +5,7 @@ import '../services/firestore_service.dart';
 import '../models/user_model.dart';
 import 'login_screen.dart';
 import 'challenges_screen.dart';
+import 'profile_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -69,6 +70,13 @@ class _HomeScreenState extends State<HomeScreen> {
       );
       _loadUserData();
     }
+    else if (index == 3) {
+    await Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => const ProfileScreen()),
+    );  
+    _loadUserData();
+}
     // Add logic for History, Profile as needed
   }
 
