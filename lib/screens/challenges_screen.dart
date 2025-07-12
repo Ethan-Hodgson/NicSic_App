@@ -16,15 +16,29 @@ class _ChallengesScreenState extends State<ChallengesScreen> {
   @override
   void initState() {
     super.initState();
+    _loadUser();
+  }
+
+  void _loadUser() {
     final user = FirebaseAuth.instance.currentUser;
-    _userFuture = user != null
-        ? FirestoreService().getUser(user.uid)
-        : Future.value(null);
+    setState(() {
+      _userFuture = user != null
+          ? FirestoreService().getUser(user.uid)
+          : Future.value(null);
+    });
+  }
+
+  bool hasTrackedToday(DateTime? lastTracked) {
+    if (lastTracked == null) return false;
+    final now = DateTime.now();
+    return now.year == lastTracked.year &&
+        now.month == lastTracked.month &&
+        now.day == lastTracked.day;
   }
 
   Widget _buildChallengeTile({
     required String label,
-    required int currentStreak,
+    required int currentValue,
     required int goal,
     required bool isBadge,
     required bool completed,
@@ -42,7 +56,7 @@ class _ChallengesScreenState extends State<ChallengesScreen> {
             ? Text("Earn badge and a token")
             : Text("Earn a token"),
         trailing: Text(
-          "$currentStreak / $goal",
+          "$currentValue / $goal",
           style: TextStyle(
             fontWeight: FontWeight.bold,
             color: completed ? Colors.green : Colors.black,
@@ -55,7 +69,16 @@ class _ChallengesScreenState extends State<ChallengesScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Challenges")),
+      appBar: AppBar(
+        title: const Text("Challenges"),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.refresh),
+            onPressed: _loadUser,
+            tooltip: "Refresh",
+          ),
+        ],
+      ),
       body: FutureBuilder<AppUser?>(
         future: _userFuture,
         builder: (context, snapshot) {
@@ -64,6 +87,7 @@ class _ChallengesScreenState extends State<ChallengesScreen> {
           }
           final user = snapshot.data!;
           final streak = user.currentStreak;
+          final trackedToday = hasTrackedToday(user.lastTracked);
 
           return ListView(
             padding: const EdgeInsets.all(16),
@@ -73,18 +97,18 @@ class _ChallengesScreenState extends State<ChallengesScreen> {
                 style: Theme.of(context).textTheme.titleMedium,
               ),
               const SizedBox(height: 16),
-              // 1 Day Challenge (daily)
+              // Track Symptoms Today Challenge (uses trackedToday)
               _buildChallengeTile(
                 label: "Track symptoms today",
-                currentStreak: streak >= 1 ? 1 : 0,
+                currentValue: trackedToday ? 1 : 0,
                 goal: 1,
                 isBadge: false,
-                completed: streak >= 1,
+                completed: trackedToday,
               ),
               // 30 Day Challenge
               _buildChallengeTile(
                 label: "30 Day Streak",
-                currentStreak: streak > 30 ? 30 : streak,
+                currentValue: streak > 30 ? 30 : streak,
                 goal: 30,
                 isBadge: true,
                 completed: streak >= 30,
@@ -92,7 +116,7 @@ class _ChallengesScreenState extends State<ChallengesScreen> {
               // 60 Day Challenge
               _buildChallengeTile(
                 label: "60 Day Streak",
-                currentStreak: streak > 60 ? 60 : streak,
+                currentValue: streak > 60 ? 60 : streak,
                 goal: 60,
                 isBadge: true,
                 completed: streak >= 60,
@@ -100,7 +124,7 @@ class _ChallengesScreenState extends State<ChallengesScreen> {
               // 90 Day Challenge
               _buildChallengeTile(
                 label: "90 Day Streak",
-                currentStreak: streak > 90 ? 90 : streak,
+                currentValue: streak > 90 ? 90 : streak,
                 goal: 90,
                 isBadge: true,
                 completed: streak >= 90,

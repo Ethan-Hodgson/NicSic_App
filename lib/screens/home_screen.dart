@@ -6,10 +6,6 @@ import '../models/user_model.dart';
 import 'login_screen.dart';
 import 'challenges_screen.dart';
 
-// Placeholder imports for screens to be implemented later
-// import 'game_screen.dart';
-// import 'health_info_screen.dart';
-
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
@@ -52,19 +48,28 @@ class _HomeScreenState extends State<HomeScreen> {
     });
 
     if (index == 0) {
-      await Navigator.push(
+      final tokenEarned = await Navigator.push<bool>(
         context,
         MaterialPageRoute(builder: (_) => const SymptomTrackerScreen()),
       );
       _loadUserData();
-    }else if (index == 2) {
+      if (tokenEarned == true && mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("You earned a token for tracking today!"),
+            duration: Duration(seconds: 2),
+            backgroundColor: Colors.deepPurple,
+          ),
+        );
+      }
+    } else if (index == 2) {
       await Navigator.push(
         context,
         MaterialPageRoute(builder: (_) => const ChallengesScreen()),
       );
       _loadUserData();
     }
-    // TODO: Implement navigation for History, Challenges, Profile if needed
+    // Add logic for History, Profile as needed
   }
 
   String formatLastTracked(DateTime? lastTracked) {
@@ -91,14 +96,12 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void _navigateToGameScreen() {
-    // TODO: Navigate to the GameScreen once implemented
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text("Game screen coming soon!")),
     );
   }
 
   void _navigateToHealthInfoScreen() {
-    // TODO: Navigate to the HealthInfoScreen once implemented
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text("Health info coming soon!")),
     );
@@ -142,11 +145,20 @@ class _HomeScreenState extends State<HomeScreen> {
 
                 ElevatedButton(
                   onPressed: () async {
-                    await Navigator.push(
+                    final tokenEarned = await Navigator.push<bool>(
                       context,
                       MaterialPageRoute(builder: (_) => const SymptomTrackerScreen()),
                     );
                     _loadUserData();
+                    if (tokenEarned == true && mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text("You earned a token for tracking today!"),
+                          duration: Duration(seconds: 2),
+                          backgroundColor: Colors.deepPurple,
+                        ),
+                      );
+                    }
                   },
                   style: ElevatedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 20)),
@@ -190,7 +202,6 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
                 const SizedBox(height: 24),
 
-                // Current Streak
                 Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
@@ -222,7 +233,6 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
                 const SizedBox(height: 24),
 
-                // Health Card/Button
                 GestureDetector(
                   onTap: _navigateToHealthInfoScreen,
                   child: Container(
@@ -257,7 +267,6 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
                 const SizedBox(height: 24),
 
-                // Tokens Widget with Use Token Button
                 Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(

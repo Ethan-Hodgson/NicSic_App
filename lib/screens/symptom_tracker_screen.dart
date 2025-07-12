@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import '../services/firestore_service.dart'; // Make sure this import is correct for handleStreakRewards!
+import '../services/firestore_service.dart';
 import 'home_screen.dart';
 
 class SymptomTrackerScreen extends StatefulWidget {
@@ -23,7 +23,6 @@ class _SymptomTrackerScreenState extends State<SymptomTrackerScreen> {
     "Nausea",
     "Irritated"
   ];
-
   final Map<String, bool> _selectedSymptoms = {};
 
   @override
@@ -32,7 +31,6 @@ class _SymptomTrackerScreenState extends State<SymptomTrackerScreen> {
     for (var symptom in _symptoms) {
       _selectedSymptoms[symptom] = false;
     }
-    // Default date to today
     final now = DateTime.now();
     _dateController.text =
         "${now.year.toString().padLeft(4, '0')}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}";
@@ -69,14 +67,15 @@ class _SymptomTrackerScreenState extends State<SymptomTrackerScreen> {
         .map((entry) => entry.key)
         .toList();
 
-    // Parse the date the user picked or default to today
     DateTime trackedDate;
     try {
       trackedDate = DateTime.parse(_dateController.text);
     } catch (_) {
       trackedDate = DateTime.now();
     }
-    final today = DateTime(trackedDate.year, trackedDate.month, trackedDate.day);
+    final today = DateTime.now();
+    final justDateToday = DateTime(today.year, today.month, today.day);
+    final trackedJustDate = DateTime(trackedDate.year, trackedDate.month, trackedDate.day);
 
     final userDocRef = FirebaseFirestore.instance.collection('users').doc(user.uid);
     final userDoc = await userDocRef.get();
@@ -96,15 +95,12 @@ class _SymptomTrackerScreenState extends State<SymptomTrackerScreen> {
     // Calculate new streak
     int newStreak = 1;
     if (lastTracked != null) {
-      final daysDifference = today.difference(lastTracked).inDays;
+      final daysDifference = trackedJustDate.difference(lastTracked).inDays;
       if (daysDifference == 0) {
-        // Already tracked today
         newStreak = currentStreak;
       } else if (daysDifference == 1) {
-        // Tracked yesterday, streak up
         newStreak = currentStreak + 1;
       } else {
-        // Missed a day, streak resets
         newStreak = 1;
       }
     }
@@ -120,7 +116,7 @@ class _SymptomTrackerScreenState extends State<SymptomTrackerScreen> {
 
       // Update the lastTracked and currentStreak in the user document
       await userDocRef.update({
-        'lastTracked': Timestamp.fromDate(today),
+        'lastTracked': Timestamp.fromDate(trackedJustDate),
         'currentStreak': newStreak,
       });
 
@@ -134,10 +130,12 @@ class _SymptomTrackerScreenState extends State<SymptomTrackerScreen> {
             duration: Duration(seconds: 3),
           ),
         );
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (_) => const HomeScreen()),
-        );
+        // Only pop with true if tracked for today, otherwise false
+        if (trackedJustDate == justDateToday) {
+          Navigator.pop(context, true);
+        } else {
+          Navigator.pop(context, false);
+        }
       }
     } catch (e) {
       if (mounted) {
@@ -147,6 +145,7 @@ class _SymptomTrackerScreenState extends State<SymptomTrackerScreen> {
             duration: const Duration(seconds: 3),
           ),
         );
+        Navigator.pop(context, false);
       }
     }
   }
@@ -187,7 +186,6 @@ class _SymptomTrackerScreenState extends State<SymptomTrackerScreen> {
             ),
             const SizedBox(height: 12),
 
-            // Symptom checkboxes
             ..._symptoms.map((symptom) => CheckboxListTile(
                   title: Text(symptom),
                   value: _selectedSymptoms[symptom],
@@ -198,7 +196,6 @@ class _SymptomTrackerScreenState extends State<SymptomTrackerScreen> {
                   },
                 )),
 
-            // "Other" symptom input
             const SizedBox(height: 16),
             TextField(
               controller: _otherController,
@@ -211,7 +208,6 @@ class _SymptomTrackerScreenState extends State<SymptomTrackerScreen> {
 
             const SizedBox(height: 24),
 
-            // Save button
             ElevatedButton(
               onPressed: _saveSymptoms,
               style: ElevatedButton.styleFrom(
