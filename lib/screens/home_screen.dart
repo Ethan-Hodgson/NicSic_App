@@ -6,6 +6,7 @@ import '../models/user_model.dart';
 import 'login_screen.dart';
 import 'challenges_screen.dart';
 import 'profile_screen.dart';
+import 'health_info_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -110,8 +111,9 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void _navigateToHealthInfoScreen() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text("Health info coming soon!")),
+    Navigator.push(context,
+    MaterialPageRoute(builder: (_) => const HealthInfoScreen()
+    )
     );
   }
 
