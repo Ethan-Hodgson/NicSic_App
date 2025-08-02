@@ -4,6 +4,7 @@ import '../services/firestore_service.dart';
 import '../models/user_model.dart';
 import 'home_screen.dart';
 import 'login_screen.dart';
+import 'symptom_history_screen.dart'; // <-- import this!
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -50,6 +51,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
         const SizedBox(height: 8),
         Text(label, style: TextStyle(fontWeight: FontWeight.bold, color: earned ? color : Colors.grey)),
       ],
+    );
+  }
+
+  // --- Add navigation function for history
+  void _navigateToHistory() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => const SymptomHistoryScreen()),
     );
   }
 
@@ -145,14 +154,27 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ),
                 ),
 
-                const SizedBox(height: 32),
+                const SizedBox(height: 24),
+
+                // --- History Button ---
+                SizedBox(
+                  width: double.infinity,
+                  child: OutlinedButton.icon(
+                    icon: const Icon(Icons.history),
+                    label: const Text("View Symptom History", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                    onPressed: _navigateToHistory,
+                    style: OutlinedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 18),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 18),
 
                 // Settings button
                 SizedBox(
                   width: double.infinity,
                   child: OutlinedButton(
                     onPressed: () {
-                      // TODO: Navigate to settings screen
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(content: Text("Settings coming soon!")),
                       );

@@ -11,7 +11,12 @@ class FirestoreService {
     final docSnapshot = await docRef.get();
 
     if (!docSnapshot.exists) {
-      await docRef.set(user.toMap());
+      await docRef.set({
+        ...user.toMap(),
+        'tokens': user.tokens ?? 0,
+        'ownedSkins': ['classic_green'],
+        'selectedSkin': 'classic_green',
+      });
       print("Firestore document created for UID: ${user.uid}");
     }
   }
@@ -93,10 +98,55 @@ class FirestoreService {
     return List<String>.from(data['completedChallenges'] ?? []);
   }
 
-  /// Update the user's token count (NEW: for game access, etc)
+  /// Update the user's token count
   Future<void> updateTokens(String uid, int newTokenCount) async {
     await _firestore.collection('users').doc(uid).update({
       'tokens': newTokenCount,
     });
+  }
+
+  /// Buy a skin: subtract tokens and add skin to ownedSkins
+  Future<bool> buySkin(String uid, String skinId, int price) async {
+    final docRef = _firestore.collection('users').doc(uid);
+
+    return _firestore.runTransaction((transaction) async {
+      final doc = await transaction.get(docRef);
+      final tokens = doc['tokens'] ?? 0;
+      List<String> ownedSkins = List<String>.from(doc['ownedSkins'] ?? ['classic_green']);
+
+      if (tokens >= price && !ownedSkins.contains(skinId)) {
+        ownedSkins.add(skinId);
+        transaction.update(docRef, {
+          'tokens': tokens - price,
+          'ownedSkins': ownedSkins,
+        });
+        return true;
+      }
+      return false;
+    });
+  }
+
+  /// Add a skin to ownedSkins WITHOUT changing tokens (for admin/dev)
+  Future<void> addOwnedSkin(String uid, String skinId) async {
+    final docRef = _firestore.collection('users').doc(uid);
+    await docRef.update({
+      'ownedSkins': FieldValue.arrayUnion([skinId]),
+    });
+  }
+
+  /// Set the selected skin for the user
+  Future<void> setSelectedSkin(String uid, String skinId) async {
+    final docRef = _firestore.collection('users').doc(uid);
+    await docRef.update({'selectedSkin': skinId});
+  }
+
+  /// Get user's owned skins and selected skin
+  Future<Map<String, dynamic>> getUserSkins(String uid) async {
+    final doc = await _firestore.collection('users').doc(uid).get();
+    final data = doc.data() ?? {};
+    return {
+      'ownedSkins': List<String>.from(data['ownedSkins'] ?? ['classic_green']),
+      'selectedSkin': data['selectedSkin'] ?? 'classic_green',
+    };
   }
 }

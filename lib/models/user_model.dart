@@ -10,6 +10,8 @@ class AppUser {
   final int currentStreak;
   final List<String> badges;
   final int tokens;
+  final String selectedSkin;        // e.g. "classic_green"
+  final List<String> ownedSkins;    // e.g. ["classic_green", "pineapple"]
 
   AppUser({
     required this.uid,
@@ -20,7 +22,9 @@ class AppUser {
     required this.currentStreak,
     required this.badges,
     required this.tokens,
-  });
+    this.selectedSkin = 'classic_green',
+    List<String>? ownedSkins,
+  }) : ownedSkins = ownedSkins ?? const ['classic_green'];
 
   factory AppUser.fromFirebaseUser(User user) {
     return AppUser(
@@ -32,6 +36,8 @@ class AppUser {
       currentStreak: 0,
       badges: [],
       tokens: 0,
+      selectedSkin: 'classic_green',
+      ownedSkins: const ['classic_green'],
     );
   }
 
@@ -47,6 +53,8 @@ class AppUser {
       currentStreak: data['currentStreak'] ?? 0,
       badges: List<String>.from(data['badges'] ?? []),
       tokens: data['tokens'] ?? 0,
+      selectedSkin: data['selectedSkin'] ?? 'classic_green',
+      ownedSkins: List<String>.from(data['ownedSkins'] ?? ['classic_green']),
     );
   }
 
@@ -62,6 +70,8 @@ class AppUser {
       'currentStreak': currentStreak,
       'badges': badges,
       'tokens': tokens,
+      'selectedSkin': selectedSkin,
+      'ownedSkins': ownedSkins,
     };
   }
 }

@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'dart:math';
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import '../services/firestore_service.dart';
 
 class GameScreen extends StatefulWidget {
   const GameScreen({super.key});
@@ -17,6 +19,17 @@ class _Event {
   final double duration; // seconds
   _Event({required this.type, required this.color, required this.duration});
 }
+
+// Map skinId to { color: ..., emoji: ... }
+const Map<String, Map<String, dynamic>> kSkinPresets = {
+  'classic_green':   { 'color': Colors.green,  'emoji': null },
+  'red_apple':       { 'color': Colors.red,    'emoji': '🍎' },
+  'pineapple':       { 'color': Colors.yellow, 'emoji': '🍍' },
+  'blueberry':       { 'color': Colors.blue,   'emoji': '🫐' },
+  'orange_orange':   { 'color': Colors.orange, 'emoji': '🍊' },
+  'grapefruit':      { 'color': Colors.pink,   'emoji': '🍊' },
+  // Add more skins as you wish!
+};
 
 class _GameScreenState extends State<GameScreen> {
   static const int gameDuration = 30; // seconds
@@ -41,9 +54,31 @@ class _GameScreenState extends State<GameScreen> {
   double _holdWindowEnd = 0; // absolute time in seconds since start
   double _elapsed = 0; // seconds since game started
 
+  // Skin stuff
+  String _skinId = 'classic_green';
+  Color _skinColor = Colors.green;
+  String? _skinEmoji;
+
   @override
   void initState() {
     super.initState();
+    _loadSkinAndStart();
+  }
+
+  Future<void> _loadSkinAndStart() async {
+    // Get current user UID
+    final user = FirebaseAuth.instance.currentUser;
+    String skinId = 'classic_green';
+    if (user != null) {
+      final skinData = await FirestoreService().getUserSkins(user.uid);
+      skinId = skinData['selectedSkin'] ?? 'classic_green';
+    }
+    final skinInfo = kSkinPresets[skinId] ?? kSkinPresets['classic_green']!;
+    setState(() {
+      _skinId = skinId;
+      _skinColor = skinInfo['color'];
+      _skinEmoji = skinInfo['emoji'];
+    });
     _events = _generateEventsToFillTime();
     _startGame();
   }
@@ -58,7 +93,6 @@ class _GameScreenState extends State<GameScreen> {
   List<_Event> _generateEventsToFillTime() {
     List<_Event> events = [];
     double totalTime = 0;
-    // Increase potential holds to 5-6 total, but always spaced
     while (totalTime < gameDuration) {
       int greens = _random.nextInt(3) + 2; // 2-4 greens
       int yellows = _random.nextInt(2) + 2; // 2-3 yellows
@@ -67,7 +101,7 @@ class _GameScreenState extends State<GameScreen> {
       for (int i = 0; i < greens; i++) {
         double dur = _randTapDur();
         if (totalTime + dur > gameDuration) break;
-        events.add(_Event(type: EventType.tap, color: Colors.green, duration: dur));
+        events.add(_Event(type: EventType.tap, color: _skinColor, duration: dur));
         totalTime += dur;
       }
       for (int i = 0; i < yellows; i++) {
@@ -190,7 +224,6 @@ class _GameScreenState extends State<GameScreen> {
 
   void _onTapDown(TapDownDetails details) {
     if (_gameEnded) return;
-    // If all events are done, default to tap events till timer ends!
     final bool moreEvents = _currentEvent < _events.length;
     final _Event? event = moreEvents ? _events[_currentEvent] : null;
 
@@ -227,7 +260,7 @@ class _GameScreenState extends State<GameScreen> {
       // Award if held for 50% of event window
       if (heldFor >= 0.5 * eventDur) {
         setState(() {
-          _tapMultiplier = _tapMultiplier * 2;   // <- critical!
+          _tapMultiplier = _tapMultiplier * 2;
           _feedback = "Great Hold! Tap = x$_tapMultiplier!";
           _holdAwarded = true;
         });
@@ -263,16 +296,15 @@ class _GameScreenState extends State<GameScreen> {
               TextButton(
                 child: const Text("Exit"),
                 onPressed: () {
-                  Navigator.of(context).pop(); // close dialog
-                  Navigator.of(context).pop(); // back to home
+                  Navigator.of(context).pop();
+                  Navigator.of(context).pop();
                 },
               ),
               TextButton(
                 child: const Text("Play Again"),
                 onPressed: () {
                   Navigator.pop(context);
-                  _events = _generateEventsToFillTime();
-                  _startGame();
+                  _loadSkinAndStart();
                 },
               ),
             ],
@@ -291,16 +323,18 @@ class _GameScreenState extends State<GameScreen> {
 
     Color circleColor;
     String circleText;
+    String? skinEmoji = _skinEmoji;
+
     if (gameActive) {
       if (isHold) {
         circleColor = Colors.orange;
-        circleText = "Hold!";
+        circleText = skinEmoji ?? "Hold!";
       } else if (event != null) {
         circleColor = event.color;
-        circleText = "Tap!";
+        circleText = skinEmoji ?? "Tap!";
       } else {
-        circleColor = Colors.green;
-        circleText = "Tap!";
+        circleColor = _skinColor;
+        circleText = skinEmoji ?? "Tap!";
       }
     } else {
       circleColor = Colors.grey[400]!;
@@ -351,7 +385,7 @@ class _GameScreenState extends State<GameScreen> {
                   child: Center(
                     child: Text(
                       circleText,
-                      style: const TextStyle(fontSize: 40, fontWeight: FontWeight.bold, color: Colors.white),
+                      style: TextStyle(fontSize: skinEmoji != null ? 70 : 40, fontWeight: FontWeight.bold, color: Colors.white),
                     ),
                   ),
                 ),
