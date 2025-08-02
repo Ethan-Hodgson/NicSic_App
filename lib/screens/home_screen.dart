@@ -7,6 +7,9 @@ import 'login_screen.dart';
 import 'challenges_screen.dart';
 import 'profile_screen.dart';
 import 'health_info_screen.dart';
+import '../game/game_screen.dart';
+// Import your shop screen!
+import 'shop_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -25,7 +28,7 @@ class _HomeScreenState extends State<HomeScreen> {
     _loadUserData();
   }
 
-  void _loadUserData() {
+  Future<void> _loadUserData() async {
     final user = FirebaseAuth.instance.currentUser;
     setState(() {
       _userFuture = user != null
@@ -54,7 +57,8 @@ class _HomeScreenState extends State<HomeScreen> {
         context,
         MaterialPageRoute(builder: (_) => const SymptomTrackerScreen()),
       );
-      _loadUserData();
+      await Future.delayed(const Duration(milliseconds: 300));
+      await _loadUserData();
       if (tokenEarned == true && mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -64,21 +68,30 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         );
       }
+    } else if (index == 1) {
+      // Open the shop screen!
+      await Navigator.push(
+        context,
+        MaterialPageRoute(builder: (_) => const ShopScreen()),
+      );
+      await Future.delayed(const Duration(milliseconds: 300));
+      await _loadUserData();
     } else if (index == 2) {
       await Navigator.push(
         context,
         MaterialPageRoute(builder: (_) => const ChallengesScreen()),
       );
-      _loadUserData();
+      await Future.delayed(const Duration(milliseconds: 300));
+      await _loadUserData();
+    } else if (index == 3) {
+      await Navigator.push(
+        context,
+        MaterialPageRoute(builder: (_) => const ProfileScreen()),
+      );
+      await Future.delayed(const Duration(milliseconds: 300));
+      await _loadUserData();
     }
-    else if (index == 3) {
-    await Navigator.push(
-      context,
-      MaterialPageRoute(builder: (_) => const ProfileScreen()),
-    );  
-    _loadUserData();
-}
-    // Add logic for History, Profile as needed
+    // History will now be in Profile screen.
   }
 
   String formatLastTracked(DateTime? lastTracked) {
@@ -104,16 +117,24 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-  void _navigateToGameScreen() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text("Game screen coming soon!")),
+  void _navigateToHealthInfoScreen() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => const HealthInfoScreen()),
     );
   }
 
-  void _navigateToHealthInfoScreen() {
-    Navigator.push(context,
-    MaterialPageRoute(builder: (_) => const HealthInfoScreen()
-    )
+  void _navigateToShop() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => const ShopScreen()),
+    ).then((_) => _loadUserData());
+  }
+
+  void _navigateToGame() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => const GameScreen()),
     );
   }
 
@@ -153,13 +174,30 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
                 const SizedBox(height: 16),
 
+                // NEW: Play Game Widget
+                Card(
+                  color: Colors.lightBlue[50],
+                  margin: const EdgeInsets.symmetric(vertical: 10),
+                  child: ListTile(
+                    leading: Icon(Icons.sports_esports, color: Colors.blue[700], size: 36),
+                    title: Text("Feeling a craving?", style: TextStyle(fontWeight: FontWeight.bold)),
+                    subtitle: Text("Play this game to distract yourself!"),
+                    trailing: ElevatedButton(
+                      onPressed: _navigateToGame,
+                      child: Text("Play"),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 10),
+
                 ElevatedButton(
                   onPressed: () async {
                     final tokenEarned = await Navigator.push<bool>(
                       context,
                       MaterialPageRoute(builder: (_) => const SymptomTrackerScreen()),
                     );
-                    _loadUserData();
+                    await Future.delayed(const Duration(milliseconds: 300));
+                    await _loadUserData();
                     if (tokenEarned == true && mounted) {
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(
@@ -277,6 +315,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
                 const SizedBox(height: 24),
 
+                // TOKEN SECTION, Use Token button now takes to Shop!
                 Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
@@ -306,7 +345,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                       ),
                       ElevatedButton(
-                        onPressed: _navigateToGameScreen,
+                        onPressed: _navigateToShop,
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.deepPurple,
                           foregroundColor: Colors.white,
@@ -315,7 +354,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             borderRadius: BorderRadius.circular(8),
                           ),
                         ),
-                        child: const Text("Use Token"),
+                        child: const Text("Shop"),
                       ),
                     ],
                   ),
@@ -334,7 +373,7 @@ class _HomeScreenState extends State<HomeScreen> {
         onTap: _onNavBarTapped,
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.track_changes), label: 'Track'),
-          BottomNavigationBarItem(icon: Icon(Icons.history), label: 'History'),
+          BottomNavigationBarItem(icon: Icon(Icons.store), label: 'Shop'), // was History
           BottomNavigationBarItem(icon: Icon(Icons.flag), label: 'Challenges'),
           BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
         ],

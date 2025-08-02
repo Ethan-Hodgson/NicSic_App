@@ -68,7 +68,8 @@ class FirestoreService {
   Future<void> awardBadgeAfterGame(User user, String challengeKey) async {
     final docRef = _firestore.collection('users').doc(user.uid);
     final doc = await docRef.get();
-    final data = doc.data()!;
+    final data = doc.data();
+    if (data == null) return;
     final badges = List<String>.from(data['badges'] ?? []);
 
     final challengeToBadge = {
@@ -90,5 +91,12 @@ class FirestoreService {
     final data = doc.data();
     if (data == null) return [];
     return List<String>.from(data['completedChallenges'] ?? []);
+  }
+
+  /// Update the user's token count (NEW: for game access, etc)
+  Future<void> updateTokens(String uid, int newTokenCount) async {
+    await _firestore.collection('users').doc(uid).update({
+      'tokens': newTokenCount,
+    });
   }
 }

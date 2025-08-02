@@ -5,11 +5,6 @@ plugins {
     id("dev.flutter.flutter-gradle-plugin")
 }
 
-dependencies {
-  implementation(platform("com.google.firebase:firebase-bom:33.16.0"))
-  implementation("com.google.firebase:firebase-analytics")
-}
-
 android {
     namespace = "com.example.nicsick_app"
     compileSdk = flutter.compileSdkVersion
@@ -18,6 +13,7 @@ android {
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
+        isCoreLibraryDesugaringEnabled = true
     }
 
     kotlinOptions {
@@ -25,20 +21,25 @@ android {
     }
 
     defaultConfig {
-    applicationId = "com.example.nicsick_app"
-    minSdk = 23
-    targetSdk = 34
-    versionCode = 1
-    versionName = "1.0"
-}
+        applicationId = "com.example.nicsick_app"
+        minSdk = 23
+        targetSdk = 34
+        versionCode = 1
+        versionName = "1.0"
+    }
 
     buildTypes {
         release {
-            // TODO: Add your own signing config for the release build.
             // Signing with the debug keys for now, so `flutter run --release` works.
             signingConfig = signingConfigs.getByName("debug")
         }
     }
+}
+
+dependencies {
+    implementation(platform("com.google.firebase:firebase-bom:33.16.0"))
+    implementation("com.google.firebase:firebase-analytics")
+    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.4")
 }
 
 flutter {

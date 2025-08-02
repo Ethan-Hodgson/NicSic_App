@@ -123,6 +123,17 @@ class _SymptomTrackerScreenState extends State<SymptomTrackerScreen> {
       // Reward logic for streaks/badges/tokens
       await FirestoreService().handleStreakRewards(user, newStreak);
 
+      // ------------- NEW TOKEN LOGIC -------------
+      // Only award token if tracked for today
+      if (trackedJustDate == justDateToday) {
+        await FirebaseFirestore.instance.runTransaction((transaction) async {
+          final freshSnap = await transaction.get(userDocRef);
+          int tokens = (freshSnap.data()?['tokens'] ?? 0) as int;
+          transaction.update(userDocRef, {'tokens': tokens + 1});
+        });
+      }
+      // -------------------------------------------
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
