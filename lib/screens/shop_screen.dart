@@ -136,11 +136,11 @@ class _ShopScreenState extends State<ShopScreen> {
                       child: ListTile(
                         leading: CircleAvatar(
                           backgroundColor: skin['color'],
+                          radius: 32,
                           child: Text(
                             skin['emoji'],
                             style: const TextStyle(fontSize: 30),
                           ),
-                          radius: 32,
                         ),
                         title: Text(skin['label'], style: const TextStyle(fontSize: 20)),
                         subtitle: isSelected

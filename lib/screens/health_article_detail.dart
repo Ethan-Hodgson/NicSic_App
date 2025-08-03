@@ -36,6 +36,8 @@ class HealthArticleDetail extends StatelessWidget {
 
 // ------- Article #1: Why Quit -------
 class WhyQuitArticle extends StatelessWidget {
+  const WhyQuitArticle({super.key});
+
   @override
   Widget build(BuildContext context) {
     return HealthArticleDetail(
@@ -111,6 +113,8 @@ class WhyQuitArticle extends StatelessWidget {
 
 // ------- Article #2: Nicotine Withdrawal -------
 class WithdrawalArticle extends StatelessWidget {
+  const WithdrawalArticle({super.key});
+
   @override
   Widget build(BuildContext context) {
     return HealthArticleDetail(
@@ -162,6 +166,8 @@ class WithdrawalArticle extends StatelessWidget {
 
 // ------- Article #3: Coping with Cravings -------
 class CravingsArticle extends StatelessWidget {
+  const CravingsArticle({super.key});
+
   @override
   Widget build(BuildContext context) {
     return HealthArticleDetail(
@@ -208,6 +214,8 @@ class CravingsArticle extends StatelessWidget {
 
 // ------- Article #4: Building Motivation -------
 class MotivationArticle extends StatelessWidget {
+  const MotivationArticle({super.key});
+
   @override
   Widget build(BuildContext context) {
     return HealthArticleDetail(
@@ -255,6 +263,8 @@ class MotivationArticle extends StatelessWidget {
 
 // ------- Article #5: Support Resources (with buttons) -------
 class SupportResourcesArticle extends StatelessWidget {
+  const SupportResourcesArticle({super.key});
+
   @override
   Widget build(BuildContext context) {
     return HealthArticleDetail(
@@ -312,6 +322,8 @@ class SupportResourcesArticle extends StatelessWidget {
 
 // ------- Article #6: Vaping and Young People -------
 class YoungPeopleArticle extends StatelessWidget {
+  const YoungPeopleArticle({super.key});
+
   @override
   Widget build(BuildContext context) {
     return HealthArticleDetail(
@@ -355,6 +367,8 @@ class YoungPeopleArticle extends StatelessWidget {
 
 // ------- Article #7: Myths vs Facts (you can expand this) -------
 class MythsFactsArticle extends StatelessWidget {
+  const MythsFactsArticle({super.key});
+
   @override
   Widget build(BuildContext context) {
     return HealthArticleDetail(
